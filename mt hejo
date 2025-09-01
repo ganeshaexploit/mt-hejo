@@ -1,0 +1,126 @@
+-- ⚡ Brutal Teleport Multi-Point (No Delay + Auto Reset) by Ganesha Exploit ⚡
+-- ✅ Teleport CFrame brutal instan
+-- ✅ Auto reset 1s setelah checkpoint terakhir
+-- ✅ Loop otomatis setelah respawn
+-- ✅ UI Modern ON/OFF + Hotkey [T]
+-- ✅ Notifikasi Roblox "Auto Summit by Ganesha Exploit"
+
+-- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+
+-- Daftar titik teleport
+local teleportPoints = {
+    Vector3.new(-532.55, 153.99, 2539.41),
+    Vector3.new(661.05, 209.99, 2072.23),
+    Vector3.new(-582.07, 153.91, 1887.31),
+    Vector3.new(-339.01, 73.36, 2099.93),
+    Vector3.new(677.78, 37.04, 1559.28),
+    Vector3.new(-249.96, 165.25, 1524.83),
+    Vector3.new(177.11, 89.50, 1171.24),
+    Vector3.new(587.01, 189.99, 938.16),
+    Vector3.new(253.67, 313.99, 959.78),
+    Vector3.new(-327.64, 105.22, 1201.46),
+    Vector3.new(-2.59, 101.50, 711.37),
+    Vector3.new(42.59, 601.50, -240.83),
+    Vector3.new(196.16, 601.00, -179.06)
+}
+
+-- Variabel global
+local teleportEnabled = false
+
+-- Fungsi notifikasi Roblox
+local function Notify(msg)
+    StarterGui:SetCore("SendNotification", {
+        Title = "⚡ Auto Teleport",
+        Text = msg,
+        Duration = 3
+    })
+end
+
+local function SummitNotify()
+    StarterGui:SetCore("SendNotification", {
+        Title = "⚡ Auto Summit",
+        Text = "by Ganesha Exploit",
+        Duration = 4
+    })
+end
+
+-- Fungsi teleport brutal instan + auto reset
+local function BrutalTeleport()
+    while teleportEnabled do
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local hrp = character.HumanoidRootPart
+
+            -- Teleport ke semua titik
+            for _, point in ipairs(teleportPoints) do
+                if not teleportEnabled then break end
+                hrp.CFrame = CFrame.new(point + Vector3.new(0, 3, 0))
+            end
+
+            -- Tunggu 1 detik lalu reset karakter
+            if teleportEnabled then
+                task.wait(1)
+                SummitNotify() -- notif khusus Auto Summit
+                character:BreakJoints() -- reset karakter
+            end
+        end
+
+        -- Tunggu respawn
+        player.CharacterAdded:Wait()
+        task.wait(1) -- buffer biar aman
+    end
+end
+
+-- UI Modern
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 200, 0, 60)
+Frame.Position = UDim2.new(0.5, -100, 0.1, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.BackgroundTransparency = 0.2
+Frame.Active = true
+Frame.Draggable = true
+Frame.BorderSizePixel = 0
+Frame.Visible = true
+
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+local Button = Instance.new("TextButton", Frame)
+Button.Size = UDim2.new(1, -20, 1, -20)
+Button.Position = UDim2.new(0, 10, 0, 10)
+Button.Text = "Teleport: OFF"
+Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.TextScaled = true
+Button.Font = Enum.Font.GothamBold
+local UICorner2 = Instance.new("UICorner", Button)
+UICorner2.CornerRadius = UDim.new(0, 10)
+
+-- Toggle manual
+Button.MouseButton1Click:Connect(function()
+    teleportEnabled = not teleportEnabled
+    Button.Text = teleportEnabled and "Teleport: ON" or "Teleport: OFF"
+    Notify("Teleport " .. (teleportEnabled and "Aktif" or "Nonaktif"))
+    if teleportEnabled then
+        task.spawn(BrutalTeleport)
+    end
+end)
+
+-- Hotkey [T]
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.T then
+        teleportEnabled = not teleportEnabled
+        Button.Text = teleportEnabled and "Teleport: ON" or "Teleport: OFF"
+        Notify("Teleport " .. (teleportEnabled and "Aktif" or "Nonaktif"))
+        if teleportEnabled then
+            task.spawn(BrutalTeleport)
+        end
+    end
+end)
+
+Notify("Script Loaded ✅ Tekan [T] atau klik tombol UI")

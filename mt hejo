@@ -1,16 +1,25 @@
--- ⚡ Brutal Teleport Multi-Point (No Delay + Auto Reset) by Ganesha Exploit ⚡
--- ✅ Teleport CFrame brutal instan
--- ✅ Auto reset 1s setelah checkpoint terakhir
--- ✅ Loop otomatis setelah respawn
--- ✅ Auto Start saat script dijalankan
--- ✅ Hotkey [T] untuk ON/OFF
--- ✅ Notifikasi Roblox "Auto Summit by Ganesha Exploit"
+-- Load Rayfield
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "⚡ Auto Summit by Ganesha Exploit",
+   LoadingTitle = "Auto Summit",
+   LoadingSubtitle = "by Ganesha Exploit",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+      FileName = "AutoSummitConfig"
+   },
+   Discord = {
+      Enabled = false
+   },
+   KeySystem = false
+})
 
 -- Services
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
 local StarterGui = game:GetService("StarterGui")
+local player = Players.LocalPlayer
 
 -- Daftar titik teleport
 local teleportPoints = {
@@ -29,8 +38,9 @@ local teleportPoints = {
     Vector3.new(196.16, 601.00, -179.06)
 }
 
--- Variabel global (langsung aktif)
+-- Variabel global
 local teleportEnabled = true
+local teleportThread
 
 -- Fungsi notifikasi Roblox
 local function Notify(msg)
@@ -49,44 +59,54 @@ local function SummitNotify()
     })
 end
 
--- Fungsi teleport brutal instan + auto reset
+-- Fungsi teleport brutal
 local function BrutalTeleport()
     while teleportEnabled do
         local character = player.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
             local hrp = character.HumanoidRootPart
 
-            -- Teleport ke semua titik
             for _, point in ipairs(teleportPoints) do
                 if not teleportEnabled then break end
-                hrp.CFrame = CFrame.new(point + Vector3.new(0, 3, 0))
+                hrp.CFrame = CFrame.new(point + Vector3.new(0,3,0))
+                task.wait() -- biar tidak freeze
             end
 
-            -- Tunggu 1 detik lalu reset karakter
             if teleportEnabled then
                 task.wait(1)
-                SummitNotify() -- notif khusus Auto Summit
-                character:BreakJoints() -- reset karakter
+                SummitNotify()
+                character:BreakJoints()
             end
         end
-
-        -- Tunggu respawn
         player.CharacterAdded:Wait()
-        task.wait(1) -- buffer biar aman
+        task.wait(1)
     end
 end
 
--- Hotkey [T] untuk toggle ON/OFF
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.T then
-        teleportEnabled = not teleportEnabled
-        Notify("Teleport " .. (teleportEnabled and "Aktif" or "Nonaktif"))
-        if teleportEnabled then
-            task.spawn(BrutalTeleport)
-        end
-    end
-end)
+-- Fungsi toggle
+local function ToggleTeleport(state)
+    teleportEnabled = state
+    Notify("Teleport " .. (teleportEnabled and "Aktif" or "Nonaktif"))
 
--- Auto start saat script dijalankan
-Notify("Script Loaded ✅ Auto Start Aktif (tekan [T] untuk ON/OFF)")
-task.spawn(BrutalTeleport)
+    if teleportEnabled and (not teleportThread or not teleportThread.Running) then
+        teleportThread = task.spawn(BrutalTeleport)
+    end
+end
+
+-- Buat tab dan section
+local MainTab = Window:CreateTab("Main")
+local TeleportSection = MainTab:CreateSection("Teleport")
+
+-- Tambahkan toggle di UI
+MainTab:CreateToggle({
+    Name = "Auto Teleport",
+    CurrentValue = true,
+    Flag = "AutoTeleport",
+    Callback = function(Value)
+        ToggleTeleport(Value)
+    end
+})
+
+-- Auto start
+Notify("Script Loaded ✅ Auto Start Aktif")
+teleportThread = task.spawn(BrutalTeleport)

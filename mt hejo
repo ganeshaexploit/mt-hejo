@@ -2,7 +2,8 @@
 -- ✅ Teleport CFrame brutal instan
 -- ✅ Auto reset 1s setelah checkpoint terakhir
 -- ✅ Loop otomatis setelah respawn
--- ✅ UI Modern ON/OFF + Hotkey [T]
+-- ✅ Auto Start saat script dijalankan
+-- ✅ Hotkey [T] untuk ON/OFF
 -- ✅ Notifikasi Roblox "Auto Summit by Ganesha Exploit"
 
 -- Services
@@ -28,8 +29,8 @@ local teleportPoints = {
     Vector3.new(196.16, 601.00, -179.06)
 }
 
--- Variabel global
-local teleportEnabled = false
+-- Variabel global (langsung aktif)
+local teleportEnabled = true
 
 -- Fungsi notifikasi Roblox
 local function Notify(msg)
@@ -75,47 +76,10 @@ local function BrutalTeleport()
     end
 end
 
--- UI Modern
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 200, 0, 60)
-Frame.Position = UDim2.new(0.5, -100, 0.1, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.BackgroundTransparency = 0.2
-Frame.Active = true
-Frame.Draggable = true
-Frame.BorderSizePixel = 0
-Frame.Visible = true
-
-local UICorner = Instance.new("UICorner", Frame)
-UICorner.CornerRadius = UDim.new(0, 12)
-
-local Button = Instance.new("TextButton", Frame)
-Button.Size = UDim2.new(1, -20, 1, -20)
-Button.Position = UDim2.new(0, 10, 0, 10)
-Button.Text = "Teleport: OFF"
-Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.TextScaled = true
-Button.Font = Enum.Font.GothamBold
-local UICorner2 = Instance.new("UICorner", Button)
-UICorner2.CornerRadius = UDim.new(0, 10)
-
--- Toggle manual
-Button.MouseButton1Click:Connect(function()
-    teleportEnabled = not teleportEnabled
-    Button.Text = teleportEnabled and "Teleport: ON" or "Teleport: OFF"
-    Notify("Teleport " .. (teleportEnabled and "Aktif" or "Nonaktif"))
-    if teleportEnabled then
-        task.spawn(BrutalTeleport)
-    end
-end)
-
--- Hotkey [T]
+-- Hotkey [T] untuk toggle ON/OFF
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.T then
         teleportEnabled = not teleportEnabled
-        Button.Text = teleportEnabled and "Teleport: ON" or "Teleport: OFF"
         Notify("Teleport " .. (teleportEnabled and "Aktif" or "Nonaktif"))
         if teleportEnabled then
             task.spawn(BrutalTeleport)
@@ -123,4 +87,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-Notify("Script Loaded ✅ Tekan [T] atau klik tombol UI")
+-- Auto start saat script dijalankan
+Notify("Script Loaded ✅ Auto Start Aktif (tekan [T] untuk ON/OFF)")
+task.spawn(BrutalTeleport)
